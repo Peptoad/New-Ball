@@ -14,12 +14,12 @@ public class BallController : MonoBehaviour
     }
     //for player movement
     private float horizontalInput;
-    public float jumpForce = 100;
+    public float jumpForce = 10;
     public float speed = 5;
     //for collision and keeping the player from double jumping
     private Rigidbody2D rb;
     private BoxCollider2D bc;
-    private Vector2 boxSize;
+    public Vector2 boxSize;
     public float castDistance;
     public LayerMask groundLayer;
     // Update is called once per frame
