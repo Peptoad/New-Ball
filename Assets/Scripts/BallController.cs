@@ -6,12 +6,6 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-        bc = GetComponent<BoxCollider2D>();
-    }
     //for player movement
     private float horizontalInput;
     public float jumpForce = 10;
@@ -19,9 +13,16 @@ public class BallController : MonoBehaviour
     //for collision and keeping the player from double jumping
     private Rigidbody2D rb;
     private BoxCollider2D bc;
-    public Vector2 boxSize;
-    public float castDistance;
+    private Vector2 boxSize;
+    private float castDistance;
     public LayerMask groundLayer;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        bc = GetComponent<BoxCollider2D>();
+    }
+    
     // Update is called once per frame
     void Update()
     {
@@ -30,7 +31,7 @@ public class BallController : MonoBehaviour
         horizontalInput = Input.GetAxis("Horizontal");
 
         transform.Translate(Vector2.right * Time.deltaTime * speed * horizontalInput);
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
         {
             if (isOnGround() == true)
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
@@ -40,15 +41,21 @@ public class BallController : MonoBehaviour
     }
     public bool isOnGround()
     {
-        if (Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundLayer))
-        {
-            return true;
-        }
-        return false;
+
+        boxSize.x = (float)(transform.localScale.x * 0.1);
+        boxSize.y = (float)(transform.localScale.y * 0.3);
+        castDistance = (float)(transform.localScale.y * 0.5);
+
+        return Physics2D.BoxCast(transform.position, boxSize, 0, -transform.up, castDistance, groundLayer);
     }
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
 
+        boxSize.x = (float)(transform.localScale.x * 0.1);
+        boxSize.y = (float)(transform.localScale.y * 0.3);
+        castDistance = (float)(transform.localScale.y * 0.5);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(transform.position - transform.up * castDistance, boxSize);
     }
 }
