@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PressurePlateController : MonoBehaviour
@@ -6,7 +7,7 @@ public class PressurePlateController : MonoBehaviour
     public Vector3 actionNotDone;
     public Vector3 actionDone;
     private Vector3 targetPosition;
-    public float moveSpeed = 2f;
+    public float moveSpeed = 3f;
 
     // Public variables
     public float weightThreshold = 10f;  // Weight limit to trigger the action
@@ -27,7 +28,7 @@ public class PressurePlateController : MonoBehaviour
         {
             targetPosition = targetObject.transform.position;
             actionNotDone = new Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
-            actionDone = new Vector3(targetPosition.x, targetPosition.y - 50, targetPosition.z); // Example Y move
+            actionDone = new Vector3(targetPosition.x, targetPosition.y - 9, targetPosition.z);
         }
     }
 
@@ -61,44 +62,28 @@ public class PressurePlateController : MonoBehaviour
         {
             totalWeight += rb.mass;
         }
-
-        // Check if the weight exceeds the threshold and the action hasn't been triggered yet
-        if (totalWeight > weightThreshold && !actionTriggered)
-        {
-            TriggerAction();
-            actionTriggered = true;
-        }
-        else if (totalWeight <= weightThreshold && actionTriggered)
-        {
-            ResetAction();
-            actionTriggered = false;
-        }
+        TriggerAction();
     }
 
     // Action triggered when weight exceeds the threshold
     private void TriggerAction()
     {
-        if (targetObject != null)
+        // Check if the weight exceeds the threshold and the action hasn't been triggered yet
+        if(totalWeight > weightThreshold && !actionTriggered)
         {
-            targetObject.transform.position = Vector3.Lerp(targetObject.transform.position, actionDone, Time.deltaTime * moveSpeed);
+            targetObject.transform.position = Vector3.MoveTowards(actionDone, actionNotDone, moveSpeed * Time.deltaTime);
+            actionTriggered = true;
         }
-    }
-
-    // Action reset when weight drops below the threshold
-    private void ResetAction()
-    {
-        if (targetObject != null)
+        else if(totalWeight <= weightThreshold && actionTriggered)
         {
-            targetObject.transform.position = Vector3.Lerp(targetObject.transform.position, actionNotDone, Time.deltaTime * moveSpeed);
+            targetObject.transform.position = Vector3.MoveTowards(actionNotDone, actionDone, moveSpeed * Time.deltaTime);
+            actionTriggered = false;
         }
     }
 
     private void OnDrawGizmos()
     {
-        // Optional: Visualize the weight detector for debugging
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position, transform.localScale);
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(transform.position + Vector3.up * 0.5f, 0.1f);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawSphere(transform.position + Vector3.up * 0.5f, 0.1f);
     }
 }
