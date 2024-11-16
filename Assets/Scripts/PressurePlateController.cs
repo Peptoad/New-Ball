@@ -71,14 +71,20 @@ public class PressurePlateController : MonoBehaviour
         // Check if the weight exceeds the threshold and the action hasn't been triggered yet
         if(totalWeight > weightThreshold && !actionTriggered)
         {
-            targetObject.transform.position = Vector3.MoveTowards(actionDone, actionNotDone, moveSpeed * Time.deltaTime);
+            Interpolate(targetObject);
+            targetObject.transform.position = Vector3.Lerp(actionDone, actionNotDone, moveSpeed * Time.deltaTime);
             actionTriggered = true;
         }
         else if(totalWeight <= weightThreshold && actionTriggered)
         {
-            targetObject.transform.position = Vector3.MoveTowards(actionNotDone, actionDone, moveSpeed * Time.deltaTime);
+            targetObject.transform.position = Vector3.Lerp(actionNotDone, actionDone, moveSpeed * Time.deltaTime);
             actionTriggered = false;
         }
+    }
+
+    private void Interpolate(GameObject)
+    {
+
     }
 
     private void OnDrawGizmos()
