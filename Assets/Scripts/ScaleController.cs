@@ -22,6 +22,20 @@ public class PowerUp : MonoBehaviour
         // Determine the target scale based on the power-up type
         Vector3 targetScale = powerUpType == PowerUpType.Grow ? growthScale : shrinkScale;
 
+        // Get the Rigidbody2D component
+        Rigidbody2D rb = targetObject.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            // Calculate the volume ratio between the new scale and the original scale
+            float originalVolume = targetObject.transform.localScale.x * targetObject.transform.localScale.y;
+            float newVolume = targetScale.x * targetScale.y;
+
+            float scaleFactor = newVolume / originalVolume;
+
+            // Scale the mass proportionally
+            rb.mass *= scaleFactor;
+        }
+
         // Apply the scale change to the object
         targetObject.transform.localScale = targetScale;
 
