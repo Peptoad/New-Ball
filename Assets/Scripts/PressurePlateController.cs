@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PressurePlateController : MonoBehaviour
@@ -22,13 +21,15 @@ public class PressurePlateController : MonoBehaviour
     // Whether the action has already been triggered
     private bool actionTriggered = false;
 
+    private bool isMoving = false;  // To track if the target object is moving
+
     private void Start()
     {
         if (targetObject != null)
         {
             targetPosition = targetObject.transform.position;
             actionNotDone = new Vector3(targetPosition.x, targetPosition.y, targetPosition.z);
-            actionDone = new Vector3(targetPosition.x, targetPosition.y - 9, targetPosition.z);
+            actionDone = new Vector3(targetPosition.x, targetPosition.y + 9, targetPosition.z);
         }
     }
 
@@ -68,28 +69,33 @@ public class PressurePlateController : MonoBehaviour
     // Action triggered when weight exceeds the threshold
     private void TriggerAction()
     {
-        // Check if the weight exceeds the threshold and the action hasn't been triggered yet
-        if(totalWeight > weightThreshold && !actionTriggered)
+        if (totalWeight > weightThreshold && !actionTriggered)
         {
-            Interpolate(targetObject);
-            targetObject.transform.position = Vector3.Lerp(actionDone, actionNotDone, moveSpeed * Time.deltaTime);
             actionTriggered = true;
+            isMoving = true;  // Start moving
         }
-        else if(totalWeight <= weightThreshold && actionTriggered)
+        else if (totalWeight <= weightThreshold && actionTriggered)
         {
-            targetObject.transform.position = Vector3.Lerp(actionNotDone, actionDone, moveSpeed * Time.deltaTime);
             actionTriggered = false;
+            isMoving = true;  // Start moving back
         }
     }
 
-    private void Interpolate(GameObject)
+    private void Update()
     {
+        if (isMoving)
+        {
+            // Smoothly move the target object towards the target position
+            Vector3 targetPos = actionTriggered ? actionDone : actionNotDone;
 
-    }
+            targetObject.transform.position = Vector3.Lerp(targetObject.transform.position, targetPos, moveSpeed * Time.deltaTime);
 
-    private void OnDrawGizmos()
-    {
-        //Gizmos.color = Color.red;
-        //Gizmos.DrawSphere(transform.position + Vector3.up * 0.5f, 0.1f);
+            // Stop moving when we are close enough to the target position
+            if (Vector3.Distance(targetObject.transform.position, targetPos) < 0.01f)
+            {
+                targetObject.transform.position = targetPos;
+                isMoving = false;  // Stop moving
+            }
+        }
     }
 }
