@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenu : MonoBehaviour
+public class ResetButton : MonoBehaviour
 {
-    public void StartGame()
+    public void ReturnToFirstLevels()
     {
         SceneManager.LoadScene("FirstLevels");
     }
-    public void QuitGame()
+    public void ReturnToLastLevels()
     {
-        Application.Quit();
+        SceneManager.LoadScene("LastLevels");
     }
 }
