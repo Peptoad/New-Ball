@@ -1,69 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
     // For player movement
     private float horizontalInput;
+    private float jumpTimer;
     public float jumpForce = 10f;
-    public float speed = 25f;
+    public float speed = 5f;
+    public float maxVelocity = 8f;
 
     // For collision and keeping the player from double jumping
     private Rigidbody2D rb;
-    private BoxCollider2D bc;
-    private Vector2 boxSize;
-    private float castDistance;
+    private bool isGrounded;
+    private float raycastDistance;
     public LayerMask groundLayer;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        bc = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        jumpTimer++;
+        
         horizontalInput = Input.GetAxis("Horizontal");
+
         rb.AddForce(new Vector2(horizontalInput * speed, 0), ForceMode2D.Force);
+        
+        raycastDistance = transform.localScale.y * 0.6f;
+        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, raycastDistance, groundLayer);
 
         // Jumping mechanic
-        if (Input.GetKeyDown(KeyCode.W) && isOnGround())
+        if (Input.GetKeyDown(KeyCode.W) && isGrounded && jumpTimer > 120)
         {
             rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpTimer = 0;
         }
-    }
-
-    // Check if the ball is grounded using a boxcast
-    public bool isOnGround()
-    {
-        // Dynamically calculate the box size based on the ball's scale
-        boxSize.x = transform.localScale.x * 0.1f;
-        boxSize.y = transform.localScale.y * 0.3f;
-        castDistance = transform.localScale.y * 0.5f;
-
-        // Get the local position for the bottom of the ball, ignoring rotation
-        Vector2 groundCheckPosition = new Vector2(transform.position.x, transform.position.y - (transform.localScale.y / 2));
-
-        // Perform a BoxCast to check if the ball is touching the ground
-        return Physics2D.BoxCast(groundCheckPosition, boxSize, 0, Vector2.down, castDistance, groundLayer);
     }
 
     // Visualize the ground check area in the Scene view
     private void OnDrawGizmos()
     {
-        // Dynamically calculate the box size based on the ball's scale
-        boxSize.x = transform.localScale.x * 0.1f;
-        boxSize.y = transform.localScale.y * 0.3f;
-        castDistance = transform.localScale.y * 0.5f;
-
-        // Visualize the ground check position (bottom of the ball)
-        Vector2 groundCheckPosition = new Vector2(transform.position.x, transform.position.y - (transform.localScale.y / 2));
-
-        // Draw the gizmo to visualize the boxcast area
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(groundCheckPosition, boxSize);
+        // Draw the gizmo to visualize the raycast area
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * raycastDistance);
     }
 }
